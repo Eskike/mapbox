@@ -116,7 +116,7 @@ public class NavigationService extends Service {
     RouteProcessorThreadListener listener = new RouteProcessorThreadListener(
       dispatcher, routeFetcher, notificationProvider
     );
-    thread = new RouteProcessorBackgroundThread(mapboxNavigation.retrieveNavigator(), new Handler(), listener);
+    thread = new RouteProcessorBackgroundThread(mapboxNavigation, new Handler(), listener);
   }
 
   private void initializeLocationProvider(MapboxNavigation mapboxNavigation) {
@@ -124,7 +124,7 @@ public class NavigationService extends Service {
     int accuracyThreshold = mapboxNavigation.options().locationAcceptableAccuracyInMetersThreshold();
     LocationValidator validator = new LocationValidator(accuracyThreshold);
     NavigationLocationEngineListener listener = new NavigationLocationEngineListener(
-      thread, mapboxNavigation, locationEngine, validator
+      thread, mapboxNavigation.retrieveNavigator(), locationEngine, validator
     );
     locationEngineUpdater = new NavigationLocationEngineUpdater(locationEngine, listener);
   }
