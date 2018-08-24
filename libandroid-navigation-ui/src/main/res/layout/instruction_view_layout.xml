@@ -57,24 +57,20 @@
         android:layout_centerHorizontal="true"
         android:visibility="invisible"/>
 
-    <include
-        android:id="@+id/soundLayout"
-        layout="@layout/sound_layout"
+    <FrameLayout
+        android:id="@+id/muteButtonContainer"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:layout_marginBottom="8dp"
         android:layout_alignParentEnd="true"
         android:layout_alignParentRight="true"
         android:layout_below="@id/extraInstructionContentLayout"/>
 
-    <include
-        android:id="@+id/feedbackLayout"
-        layout="@layout/feedback_button_layout"
+    <FrameLayout
+        android:id="@+id/feedbackButtonContainer"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentEnd="true"
         android:layout_alignParentRight="true"
-        android:layout_below="@id/soundLayout"/>
+        android:layout_below="@id/muteButtonContainer"/>
 
 </RelativeLayout>

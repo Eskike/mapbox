@@ -11,7 +11,6 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.constraint.ConstraintLayout;
 import android.support.constraint.ConstraintSet;
-import android.support.design.widget.FloatingActionButton;
 import android.support.transition.AutoTransition;
 import android.support.transition.TransitionManager;
 import android.support.v4.app.FragmentActivity;
@@ -24,12 +23,9 @@ import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.TypedValue;
 import android.view.View;
-import android.view.animation.AccelerateInterpolator;
-import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
-import android.view.animation.AnimationSet;
 import android.view.animation.AnimationUtils;
-import android.view.animation.DecelerateInterpolator;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
@@ -59,6 +55,7 @@ import com.mapbox.services.android.navigation.v5.utils.DistanceFormatter;
 import com.mapbox.services.android.navigation.v5.utils.LocaleUtils;
 import com.mapbox.services.android.navigation.v5.utils.RouteUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import timber.log.Timber;
@@ -87,9 +84,6 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
   private TextView upcomingSecondaryText;
   private ManeuverView thenManeuverView;
   private TextView thenStepText;
-  private TextView soundChipText;
-  private FloatingActionButton soundFab;
-  private FloatingActionButton feedbackFab;
   private AlertView alertView;
   private View rerouteLayout;
   private View turnLaneLayout;
@@ -103,15 +97,14 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
   private InstructionListAdapter instructionListAdapter;
   private Animation rerouteSlideUpTop;
   private Animation rerouteSlideDownTop;
-  private AnimationSet fadeInSlowOut;
   private LegStep currentStep;
   private NavigationViewModel navigationViewModel;
   private InstructionListListener instructionListListener;
+  private List<MapButton> mapButtons;
 
   private DistanceFormatter distanceFormatter;
   private String language = "";
   private String unitType = "";
-  private boolean isMuted;
   private boolean isRerouting;
 
   public InstructionView(Context context) {
@@ -214,7 +207,11 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
         }
       }
     });
-    initializeClickListeners();
+    for (MapButton mapButton : mapButtons) {
+      mapButton.subscribe(navigationViewModel);
+    }
+
+    initializeClickListener();
   }
 
   /**
@@ -271,16 +268,6 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
       rerouteLayout.startAnimation(rerouteSlideUpTop);
       rerouteLayout.setVisibility(INVISIBLE);
     }
-  }
-
-  /**
-   * Will toggle the view between muted and unmuted states.
-   *
-   * @return boolean true if muted, false if not
-   * @since 0.6.0
-   */
-  public boolean toggleMute() {
-    return isMuted ? unmute() : mute();
   }
 
   /**
@@ -361,10 +348,19 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
     checkForDistanceFormatterUpdate();
   }
 
+  public void setFeedbackButton(MapButton mapButton) {
+    // todo
+  }
+
+  public void setMuteButton(MapButton mapButton) {
+    // todo
+  }
+
   /**
    * Inflates this layout needed for this view and initializes the locale as the device locale.
    */
   private void initialize() {
+    mapButtons = new ArrayList<>();
     LocaleUtils localeUtils = new LocaleUtils();
     language = localeUtils.inferDeviceLanguage(getContext());
     unitType = localeUtils.getUnitTypeForDeviceLocale(getContext());
@@ -382,9 +378,18 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
     upcomingSecondaryText = findViewById(R.id.stepSecondaryText);
     thenManeuverView = findViewById(R.id.thenManeuverView);
     thenStepText = findViewById(R.id.thenStepText);
-    soundChipText = findViewById(R.id.soundText);
-    soundFab = findViewById(R.id.soundFab);
-    feedbackFab = findViewById(R.id.feedbackFab);
+
+    FrameLayout muteButtonContainer = findViewById(R.id.muteButtonContainer);
+    MuteButton muteButton = new MuteButton(getContext());
+    muteButtonContainer.addView(muteButton);
+    mapButtons.add(muteButton);
+
+    FrameLayout feedbackButtonContainer = findViewById(R.id.feedbackButtonContainer);
+    FeedbackButton feedbackButton = new FeedbackButton(getContext());
+    feedbackButton.setFeedbackBottomSheetListener(this);
+    feedbackButtonContainer.addView(feedbackButton);
+    mapButtons.add(feedbackButton);
+
     alertView = findViewById(R.id.alertView);
     rerouteLayout = findViewById(R.id.rerouteLayout);
     turnLaneLayout = findViewById(R.id.turnLaneLayout);
@@ -403,8 +408,6 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
    */
   private void initializeBackground() {
     if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.LOLLIPOP) {
-      int navigationViewPrimaryColor = ThemeSwitcher.retrieveThemeColor(getContext(),
-        R.attr.navigationViewPrimary);
       int navigationViewBannerBackgroundColor = ThemeSwitcher.retrieveThemeColor(getContext(),
         R.attr.navigationViewBannerBackground);
       int navigationViewListBackgroundColor = ThemeSwitcher.retrieveThemeColor(getContext(),
@@ -423,80 +426,7 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
         Drawable turnLaneBackground = DrawableCompat.wrap(turnLaneLayout.getBackground()).mutate();
         DrawableCompat.setTint(turnLaneBackground, navigationViewListBackgroundColor);
       }
-      // Sound chip text - primary
-      Drawable soundChipBackground = DrawableCompat.wrap(soundChipText.getBackground()).mutate();
-      DrawableCompat.setTint(soundChipBackground, navigationViewPrimaryColor);
     }
-  }
-
-  /**
-   * Sets up mute UI event.
-   * <p>
-   * Shows chip with "Muted" text.
-   * Changes sound {@link FloatingActionButton}
-   * {@link android.graphics.drawable.Drawable} to denote sound is off.
-   * <p>
-   * Sets private state variable to true (muted)
-   *
-   * @return true, view is in muted state
-   */
-  private boolean mute() {
-    isMuted = true;
-    setSoundChipText(getContext().getString(R.string.muted));
-    showSoundChip();
-    soundFabOff();
-    return isMuted;
-  }
-
-  /**
-   * Sets up unmuted UI event.
-   * <p>
-   * Shows chip with "Unmuted" text.
-   * Changes sound {@link FloatingActionButton}
-   * {@link android.graphics.drawable.Drawable} to denote sound is on.
-   * <p>
-   * Sets private state variable to false (unmuted)
-   *
-   * @return false, view is in unmuted state
-   */
-  private boolean unmute() {
-    isMuted = false;
-    setSoundChipText(getContext().getString(R.string.unmuted));
-    showSoundChip();
-    soundFabOn();
-    return isMuted;
-  }
-
-  /**
-   * Changes sound {@link FloatingActionButton}
-   * {@link android.graphics.drawable.Drawable} to denote sound is off.
-   */
-  private void soundFabOff() {
-    soundFab.setImageResource(R.drawable.ic_sound_off);
-  }
-
-  /**
-   * Changes sound {@link FloatingActionButton}
-   * {@link android.graphics.drawable.Drawable} to denote sound is on.
-   */
-  private void soundFabOn() {
-    soundFab.setImageResource(R.drawable.ic_sound_on);
-  }
-
-  /**
-   * Sets {@link TextView} inside of chip view.
-   *
-   * @param text to be displayed in chip view ("Muted"/"Umuted")
-   */
-  private void setSoundChipText(String text) {
-    soundChipText.setText(text);
-  }
-
-  /**
-   * Shows and then hides the sound chip using {@link AnimationSet}
-   */
-  private void showSoundChip() {
-    soundChipText.startAnimation(fadeInSlowOut);
   }
 
   /**
@@ -553,19 +483,6 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
     Context context = getContext();
     rerouteSlideDownTop = AnimationUtils.loadAnimation(context, R.anim.slide_down_top);
     rerouteSlideUpTop = AnimationUtils.loadAnimation(context, R.anim.slide_up_top);
-
-    Animation fadeIn = new AlphaAnimation(0, 1);
-    fadeIn.setInterpolator(new DecelerateInterpolator());
-    fadeIn.setDuration(300);
-
-    Animation fadeOut = new AlphaAnimation(1, 0);
-    fadeOut.setInterpolator(new AccelerateInterpolator());
-    fadeOut.setStartOffset(1000);
-    fadeOut.setDuration(1000);
-
-    fadeInSlowOut = new AnimationSet(false);
-    fadeInSlowOut.addAnimation(fadeIn);
-    fadeInSlowOut.addAnimation(fadeOut);
   }
 
   private void onInstructionListVisibilityChanged(boolean visible) {
@@ -585,7 +502,7 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
     }
   }
 
-  private void initializeClickListeners() {
+  private void initializeClickListener() {
     alertView.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View view) {
@@ -594,21 +511,6 @@ public class InstructionView extends RelativeLayout implements FeedbackBottomShe
           showFeedbackBottomSheet();
         }
         alertView.hide();
-      }
-    });
-    soundFab.setVisibility(VISIBLE);
-    soundFab.setOnClickListener(new View.OnClickListener() {
-      @Override
-      public void onClick(View view) {
-        navigationViewModel.setMuted(toggleMute());
-      }
-    });
-    feedbackFab.setVisibility(VISIBLE);
-    feedbackFab.setOnClickListener(new View.OnClickListener() {
-      @Override
-      public void onClick(View view) {
-        navigationViewModel.recordFeedback(FeedbackEvent.FEEDBACK_SOURCE_UI);
-        showFeedbackBottomSheet();
       }
     });
   }

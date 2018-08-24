@@ -532,6 +532,7 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
     establishLanguage(localeUtils, options);
     establishUnitType(localeUtils, options);
     establishTimeFormat(options);
+    setupInstructionView(options);
   }
 
   private void establishLanguage(LocaleUtils localeUtils, NavigationViewOptions options) {
@@ -552,6 +553,11 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
     @NavigationTimeFormat.Type
     int timeFormatType = options.navigationOptions().timeFormatType();
     summaryBottomSheet.setTimeFormat(timeFormatType);
+  }
+
+  private void setupInstructionView(NavigationViewOptions navigationViewOptions) {
+    instructionView.setFeedbackButton(navigationViewOptions.feedbackButton());
+    instructionView.setMuteButton(navigationViewOptions.muteButton());
   }
 
   private void initializeNavigationListeners(NavigationViewOptions options, MapboxNavigation navigation) {
