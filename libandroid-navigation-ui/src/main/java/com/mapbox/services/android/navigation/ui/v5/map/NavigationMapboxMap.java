@@ -399,15 +399,6 @@ public class NavigationMapboxMap {
   }
 
   /**
-   * Hide or show the location icon on the map.
-   *
-   * @param isVisible true to show, false to hide
-   */
-  public void updateLocationVisibilityTo(boolean isVisible) {
-    locationComponent.setLocationComponentEnabled(isVisible);
-  }
-
-  /**
    * Provides the {@link MapboxMap} originally given in the constructor.
    * <p>
    * This method gives access to all map-related APIs.
@@ -502,7 +493,7 @@ public class NavigationMapboxMap {
   }
 
   private void initializeCamera(MapboxMap map) {
-    mapCamera = new NavigationCamera(map, locationComponent);
+    mapCamera = new NavigationCamera(map);
   }
 
   private void initializeWayname(MapView mapView, MapboxMap mapboxMap, MapLayerInteractor layerInteractor,

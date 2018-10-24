@@ -98,30 +98,27 @@ public class NavigationCamera implements LifecycleObserver {
 
   /**
    * Creates an instance of {@link NavigationCamera}.
+   * <p>
+   * Camera will start tracking current user location by default.
    *
-   * @param mapboxMap         for moving the camera
-   * @param navigation        for listening to location updates
-   * @param locationComponent for managing camera mode
+   * @param mapboxMap  for moving the camera
+   * @param navigation for listening to location updates
    */
-  public NavigationCamera(@NonNull MapboxMap mapboxMap, @NonNull MapboxNavigation navigation,
-                          @NonNull LocationComponent locationComponent) {
+  public NavigationCamera(@NonNull MapboxMap mapboxMap, @NonNull MapboxNavigation navigation) {
     this.mapboxMap = mapboxMap;
+    this.locationComponent = mapboxMap.getLocationComponent();
     this.navigation = navigation;
-    this.locationComponent = locationComponent;
     initializeWith(navigation);
   }
 
   /**
    * Creates an instance of {@link NavigationCamera}.
-   * <p>
-   * Camera will start tracking current user location by default.
    *
-   * @param mapboxMap         for moving the camera
-   * @param locationComponent for managing camera mode
+   * @param mapboxMap for moving the camera
    */
-  public NavigationCamera(@NonNull MapboxMap mapboxMap, LocationComponent locationComponent) {
+  public NavigationCamera(@NonNull MapboxMap mapboxMap) {
     this.mapboxMap = mapboxMap;
-    this.locationComponent = locationComponent;
+    this.locationComponent = mapboxMap.getLocationComponent();
     updateCameraTrackingMode(trackingCameraMode);
   }
 

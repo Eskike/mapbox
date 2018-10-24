@@ -14,6 +14,7 @@ import static junit.framework.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 public class NavigationCameraTest {
 
@@ -91,11 +92,15 @@ public class NavigationCameraTest {
   }
 
   private NavigationCamera buildCamera() {
-    return new NavigationCamera(mock(MapboxMap.class), mock(MapboxNavigation.class), mock(LocationComponent.class));
+    MapboxMap mapboxMap = mock(MapboxMap.class);
+    when(mapboxMap.getLocationComponent()).thenReturn(mock(LocationComponent.class));
+    return new NavigationCamera(mapboxMap, mock(MapboxNavigation.class));
   }
 
   private NavigationCamera buildCamera(LocationComponent locationComponent) {
-    return new NavigationCamera(mock(MapboxMap.class), mock(MapboxNavigation.class), locationComponent);
+    MapboxMap mapboxMap = mock(MapboxMap.class);
+    when(mapboxMap.getLocationComponent()).thenReturn(locationComponent);
+    return new NavigationCamera(mapboxMap, mock(MapboxNavigation.class));
   }
 
   private NavigationCamera buildCamera(MapboxNavigation navigation, ProgressChangeListener listener) {
