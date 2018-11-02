@@ -40,6 +40,7 @@ import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigationOptions;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationEventListener;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationTimeFormat;
+import com.mapbox.services.android.navigation.v5.navigation.OnOfflineDataInitialized;
 import com.mapbox.services.android.navigation.v5.navigation.camera.Camera;
 import com.mapbox.services.android.navigation.v5.navigation.metrics.FeedbackEvent;
 import com.mapbox.services.android.navigation.v5.offroute.OffRouteListener;
@@ -91,6 +92,9 @@ public class NavigationViewModel extends AndroidViewModel {
   private int timeFormatType;
   private boolean isRunning;
   private boolean isChangingConfigurations;
+  private boolean isOffline;
+  private String tileFilePath;
+  private String translationsDirPath;
 
   public NavigationViewModel(Application application) {
     super(application);
@@ -181,6 +185,38 @@ public class NavigationViewModel extends AndroidViewModel {
     return navigation;
   }
 
+  /**
+   * Initializes the offline data used for fetching offline routes.
+   * <p>
+   * This method must be called before {@link MapboxNavigation#findOfflineRouteFor(Point, Point, Point[])} /
+   * {@link MapboxNavigation#findOfflineRouteFor(Location, Point, Point[])}.
+   *
+   * @param tileFilePath        path to directory containing tile data
+   * @param translationsDirPath path to directory containing OSRMTI translations
+   */
+  public void initializeOfflineData(String tileFilePath, String translationsDirPath) {
+    this.tileFilePath = tileFilePath;
+    this.translationsDirPath = translationsDirPath;
+    if (navigation != null) {
+      navigation.initializeOfflineData(tileFilePath, new OnOfflineDataInitialized() {
+        @Override
+        public void onOfflineDataInitialized() {
+
+        }
+      });
+    }
+  }
+
+  /**
+   * Sets the NavigationView to use or not use offline data. This call should be followed by a call
+   * to initializeOfflineData.
+   *
+   * @param isOffline whether the map should load offline or not
+   */
+  public void setOffline(boolean isOffline) {
+    this.isOffline = isOffline;
+  }
+
   void initializeEventDispatcher(NavigationViewEventDispatcher navigationViewEventDispatcher) {
     this.navigationViewEventDispatcher = navigationViewEventDispatcher;
   }
@@ -229,7 +265,7 @@ public class NavigationViewModel extends AndroidViewModel {
   }
 
   private void initializeNavigationRouteEngine() {
-    routeFetcher = new ViewRouteFetcher(getApplication(), accessToken, routeEngineListener);
+    routeFetcher = new ViewRouteFetcher(getApplication(), accessToken, viewRouteListener);
   }
 
   private void initializeNavigationLocationEngine() {
@@ -331,8 +367,7 @@ public class NavigationViewModel extends AndroidViewModel {
     public void userOffRoute(Location location) {
       if (hasNetworkConnection()) {
         speechPlayer.onOffRoute();
-        Point newOrigin = Point.fromLngLat(location.getLongitude(), location.getLatitude());
-        handleOffRouteEvent(newOrigin);
+        handleOffRouteEvent(location);
       }
     }
   };
@@ -361,7 +396,7 @@ public class NavigationViewModel extends AndroidViewModel {
     }
   };
 
-  private ViewRouteListener routeEngineListener = new ViewRouteListener() {
+  private ViewRouteListener viewRouteListener = new ViewRouteListener() {
     @Override
     public void onRouteUpdate(DirectionsRoute directionsRoute) {
       updateRoute(directionsRoute);
@@ -478,11 +513,29 @@ public class NavigationViewModel extends AndroidViewModel {
     }
   }
 
-  private void handleOffRouteEvent(Point newOrigin) {
+  private void handleOffRouteEvent(Location location) {
+    Point newOrigin = Point.fromLngLat(location.getLongitude(), location.getLatitude());
     if (navigationViewEventDispatcher != null && navigationViewEventDispatcher.allowRerouteFrom(newOrigin)) {
       navigationViewEventDispatcher.onOffRoute(newOrigin);
       OffRouteEvent event = new OffRouteEvent(newOrigin, routeProgress);
-      routeFetcher.fetchRouteFromOffRouteEvent(event);
+
+      if (isOffline) {
+        List<Point> locations = routeFetcher.calculateRemainingCoordinates(event);
+        DirectionsRoute directionsRoute;
+        if (locations.size() > 2) {
+          locations.remove(0);
+          int size = locations.size();
+          Point destination = locations.remove(size - 1);
+          Point[] waypoints = (Point[]) locations.toArray();
+//          directionsRoute = navigation.findOfflineRoute(location, destination, waypoints);
+        } else {
+//          directionsRoute = navigation.findOfflineRouteFor(location, locations.get(1));
+        }
+        updateRoute(directionsRoute);
+      } else {
+        routeFetcher.fetchRouteFromOffRouteEvent(event);
+      }
+
       isOffRoute.setValue(true);
     }
   }

@@ -42,7 +42,7 @@ public class RouteFetcher {
 
   private NavigationRoute navigationRoute;
   private RouteProgress routeProgress;
-  private RouteUtils routeUtils;
+  protected RouteUtils routeUtils;
 
   public RouteFetcher(Context context, String accessToken) {
     this.accessToken = accessToken;
