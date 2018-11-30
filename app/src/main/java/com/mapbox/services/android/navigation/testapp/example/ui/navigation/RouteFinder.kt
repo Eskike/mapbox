@@ -71,7 +71,7 @@ class RouteFinder(private val viewModel: ExampleViewModel,
 
     // Handle off-route scenarios
     if (viewModel.isOffRoute) {
-      viewModel.isOffRoute = false
+      viewModel.updateOffRoute(false)
       viewModel.startNavigation()
     }
   }

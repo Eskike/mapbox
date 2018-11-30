@@ -125,6 +125,14 @@ class ExampleActivity : HistoryActivity(), ExampleView {
     presenter.onNewRouteSelected(directionsRoute)
   }
 
+  override fun onCameraTrackingChanged(currentMode: Int) {
+    // No impl
+  }
+
+  override fun onCameraTrackingDismissed() {
+    presenter.onCameraTrackingDismissed()
+  }
+
   override fun onPermissionResult(granted: Boolean) {
     presenter.onPermissionsGranted(granted)
   }

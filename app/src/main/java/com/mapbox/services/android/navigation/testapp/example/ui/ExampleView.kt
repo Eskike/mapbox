@@ -8,6 +8,7 @@ import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.geojson.Point
 import com.mapbox.mapboxsdk.camera.CameraUpdate
 import com.mapbox.mapboxsdk.geometry.LatLngBounds
+import com.mapbox.mapboxsdk.location.OnCameraTrackingChangedListener
 import com.mapbox.mapboxsdk.location.modes.RenderMode
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback
 import com.mapbox.services.android.navigation.ui.v5.camera.NavigationCamera
@@ -17,7 +18,7 @@ import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress
 
 interface ExampleView: PermissionsListener, OnMapReadyCallback,
-    OnFeatureClickListener, OnRouteSelectionChangeListener {
+    OnFeatureClickListener, OnRouteSelectionChangeListener, OnCameraTrackingChangedListener {
 
   fun initialize()
 

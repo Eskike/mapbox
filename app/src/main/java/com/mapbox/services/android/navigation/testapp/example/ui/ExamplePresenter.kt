@@ -70,7 +70,7 @@ class ExamplePresenter(private val view: ExampleView, private val viewModel: Exa
   }
 
   fun onLocationFabClick() {
-    viewModel.location.value?.let {
+    viewModel.uiLocation.value?.let {
       view.updateMapCamera(buildCameraUpdateFrom(it), ONE_SECOND)
     }
   }
@@ -86,6 +86,7 @@ class ExamplePresenter(private val view: ExampleView, private val viewModel: Exa
       view.showAlternativeRoutes(false)
       view.addMapProgressChangeListener(viewModel.retrieveNavigation())
       view.updateNavigationFabVisibility(INVISIBLE)
+      view.updateSettingsFabVisibility(INVISIBLE)
       view.updateCancelFabVisibility(VISIBLE)
       view.updateInstructionViewVisibility(VISIBLE)
       view.updateLocationRenderMode(RenderMode.GPS)
@@ -136,21 +137,22 @@ class ExamplePresenter(private val view: ExampleView, private val viewModel: Exa
       }
       state = PresenterState.SELECTED_DESTINATION
       viewModel.destination.value = it
+      viewModel.destinationPoint = it
       view.clearMarkers()
       view.hideSoftKeyboard()
       view.updateAutocompleteBottomSheetState(BottomSheetBehavior.STATE_COLLAPSED)
       view.updateDestinationMarker(it)
       view.updateMapCamera(buildCameraUpdateFrom(it), TWO_SECONDS)
       view.updateLocationFabVisibility(INVISIBLE)
-      view.updateSettingsFabVisibility(INVISIBLE)
       view.updateDirectionsFabVisibility(VISIBLE)
     }
   }
 
   fun onLocationUpdate(location: Location?) {
     location?.let {
-      if (state == PresenterState.SHOW_LOCATION) {
+      if (state == PresenterState.SHOW_FIRST_LOCATION) {
         view.updateMapCamera(buildCameraUpdateFrom(location), TWO_SECONDS)
+        state = PresenterState.SHOW_LOCATION
       }
       view.updateAutocompleteProximity(location)
       view.updateMapLocation(location)
@@ -210,7 +212,7 @@ class ExamplePresenter(private val view: ExampleView, private val viewModel: Exa
   }
 
   fun subscribe(owner: LifecycleOwner) {
-    viewModel.location.observe(owner, Observer { onLocationUpdate(it) })
+    viewModel.uiLocation.observe(owner, Observer { onLocationUpdate(it) })
     viewModel.routes.observe(owner, Observer { onRouteFound(it) })
     viewModel.progress.observe(owner, Observer { onProgressUpdate(it) })
     viewModel.milestone.observe(owner, Observer { onMilestoneUpdate(it) })
@@ -220,6 +222,10 @@ class ExamplePresenter(private val view: ExampleView, private val viewModel: Exa
 
   fun buildDynamicCameraFrom(mapboxMap: MapboxMap) {
     viewModel.retrieveNavigation().cameraEngine = DynamicCamera(mapboxMap)
+  }
+
+  fun onCameraTrackingDismissed() {
+    // TODO show re-center button to resume tracking
   }
 
   private fun buildCameraUpdateFrom(location: Location): CameraUpdate {
@@ -241,7 +247,7 @@ class ExamplePresenter(private val view: ExampleView, private val viewModel: Exa
   }
 
   private fun moveCameraToInclude(destination: Point) {
-    viewModel.location.value?.let {
+    viewModel.uiLocation.value?.let {
       val origin = LatLng(it)
       val bounds = LatLngBounds.Builder()
               .include(origin)

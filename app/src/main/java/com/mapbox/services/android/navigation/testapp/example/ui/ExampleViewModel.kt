@@ -39,13 +39,16 @@ private const val TEN_MEGABYTE_CACHE_SIZE: Long = 10 * 1024 * 1024
 
 class ExampleViewModel(application: Application) : AndroidViewModel(application) {
 
-  val location: MutableLiveData<Location> = MutableLiveData()
+  val uiLocation: MutableLiveData<Location> = MutableLiveData()
   val routes: MutableLiveData<List<DirectionsRoute>> = MutableLiveData()
   val progress: MutableLiveData<RouteProgress> = MutableLiveData()
   val milestone: MutableLiveData<Milestone> = MutableLiveData()
   val destination: MutableLiveData<Point> = MutableLiveData()
   val geocode: MutableLiveData<GeocodingResponse> = MutableLiveData()
+  val offRoute: MutableLiveData<Boolean> = MutableLiveData()
 
+  var location: Location? = null
+  var destinationPoint: Point? = null
   var primaryRoute: DirectionsRoute? = null
   var collapsedBottomSheet: Boolean = false
   var isOffRoute: Boolean = false
@@ -60,9 +63,9 @@ class ExampleViewModel(application: Application) : AndroidViewModel(application)
 
   init {
     routeFinder = RouteFinder(this, routes, accessToken, retrieveOfflineVersionFromPreferences())
-    // Initialize the location engine
+    // Initialize the uiLocation engine
     locationEngine = FusedLocationEngine(getApplication())
-    locationEngineListener = ExampleLocationEngineListener(locationEngine, location)
+    locationEngineListener = ExampleLocationEngineListener(locationEngine, this)
     locationEngine.addLocationEngineListener(locationEngineListener)
     locationEngine.priority = LocationEnginePriority.HIGH_ACCURACY
     locationEngine.fastestInterval = ONE_SECOND_INTERVAL
@@ -79,7 +82,7 @@ class ExampleViewModel(application: Application) : AndroidViewModel(application)
     val speechPlayerProvider = SpeechPlayerProvider(getApplication(), english, true, voiceInstructionLoader)
     speechPlayer = NavigationSpeechPlayer(speechPlayerProvider)
     navigation.addMilestoneEventListener(ExampleMilestoneEventListener(milestone, speechPlayer))
-    navigation.addProgressChangeListener(ExampleProgressChangeListener(location, progress))
+    navigation.addProgressChangeListener(ExampleProgressChangeListener(uiLocation, progress))
     navigation.addOffRouteListener(ExampleOffRouteListener(this))
   }
 
@@ -93,7 +96,7 @@ class ExampleViewModel(application: Application) : AndroidViewModel(application)
   }
 
   fun findRouteToDestination() {
-    location.value?.let { location ->
+    uiLocation.value?.let { location ->
       destination.value?.let { destination ->
         routeFinder.findRoute(location, destination)
       }
@@ -102,6 +105,23 @@ class ExampleViewModel(application: Application) : AndroidViewModel(application)
 
   fun updatePrimaryRoute(primaryRoute: DirectionsRoute) {
     this.primaryRoute = primaryRoute
+  }
+
+  fun updateLocation(location: Location) {
+    this.location = location
+    uiLocation.value = location
+  }
+
+  fun updateOffRoute(isOffRoute: Boolean) {
+    if (this.isOffRoute == isOffRoute) {
+      return
+    }
+    this.isOffRoute = isOffRoute
+    offRoute.value = isOffRoute
+    if (isOffRoute) {
+      speechPlayer.onOffRoute()
+      findRouteToDestination()
+    }
   }
 
   fun canNavigate(): Boolean {
