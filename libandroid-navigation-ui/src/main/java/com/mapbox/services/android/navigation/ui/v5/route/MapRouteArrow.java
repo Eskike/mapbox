@@ -135,6 +135,8 @@ class MapRouteArrow {
     for (Layer arrowLayer : arrowLayers) {
       mapboxMap.removeLayer(arrowLayer);
     }
+    mapboxMap.removeSource(arrowHeadGeoJsonSource);
+    mapboxMap.removeSource(arrowShaftGeoJsonSource);
   }
 
   private List<Point> obtainArrowPointsFrom(RouteProgress routeProgress) {

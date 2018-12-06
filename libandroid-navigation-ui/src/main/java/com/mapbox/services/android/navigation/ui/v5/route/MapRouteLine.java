@@ -236,6 +236,8 @@ class MapRouteLine {
     for (Layer routeLayer : routeLayers) {
       mapboxMap.removeLayer(routeLayer);
     }
+    mapboxMap.removeSource(routeLineSource);
+    mapboxMap.removeSource(wayPointSource);
   }
 
   private void drawRoutes(List<FeatureCollection> routeFeatureCollections) {
