@@ -42,8 +42,8 @@ public class NavigationMapRoute implements LifecycleObserver {
   private final String belowLayer;
   private final MapboxMap mapboxMap;
   private final MapView mapView;
-  private final MapRouteClickListener mapRouteClickListener;
-  private final MapRouteProgressChangeListener mapRouteProgressChangeListener;
+  private MapRouteClickListener mapRouteClickListener;
+  private MapRouteProgressChangeListener mapRouteProgressChangeListener;
   private boolean isMapClickListenerAdded = false;
   private MapView.OnDidFinishLoadingStyleListener didFinishLoadingStyleListener;
   private boolean isDidFinishLoadingStyleListenerAdded = false;
@@ -354,6 +354,10 @@ public class NavigationMapRoute implements LifecycleObserver {
     int primaryRouteIndex = routeLine.retrievePrimaryRouteIndex();
     boolean isVisible = routeLine.retrieveVisibilty();
     routeLine = new MapRouteLine(mapView.getContext(), mapboxMap, styleRes, belowLayer);
+    mapboxMap.removeOnMapClickListener(mapRouteClickListener);
+    this.mapRouteClickListener = new MapRouteClickListener(routeLine);
+    mapboxMap.addOnMapClickListener(mapRouteClickListener);
+    this.mapRouteProgressChangeListener = new MapRouteProgressChangeListener(routeLine, routeArrow);
     routeLine.redraw(routes, alternativesVisible, primaryRouteIndex, isVisible);
   }
 }

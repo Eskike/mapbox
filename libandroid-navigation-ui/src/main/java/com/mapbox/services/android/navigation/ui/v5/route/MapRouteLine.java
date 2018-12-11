@@ -268,17 +268,19 @@ class MapRouteLine {
   }
 
   private void generateRouteFeatureCollectionsFrom(List<DirectionsRoute> routes) {
-    new FeatureProcessingTask(routes, new OnRouteFeaturesProcessedCallback() {
-      @Override
-      public void onRouteFeaturesProcessed(List<FeatureCollection> routeFeatureCollections,
-                                           HashMap<LineString, DirectionsRoute> routeLineStrings) {
-        MapRouteLine.this.routeFeatureCollections.addAll(routeFeatureCollections);
-        MapRouteLine.this.routeLineStrings.putAll(routeLineStrings);
-        drawRoutes(routeFeatureCollections);
-        drawWayPoints();
-      }
-    }).execute();
+    new FeatureProcessingTask(routes, routeFeaturesProcessedCallback).execute();
   }
+
+  private OnRouteFeaturesProcessedCallback routeFeaturesProcessedCallback = new OnRouteFeaturesProcessedCallback() {
+    @Override
+    public void onRouteFeaturesProcessed(List<FeatureCollection> routeFeatureCollections,
+                                         HashMap<LineString, DirectionsRoute> routeLineStrings) {
+      MapRouteLine.this.routeFeatureCollections.addAll(routeFeatureCollections);
+      MapRouteLine.this.routeLineStrings.putAll(routeLineStrings);
+      drawRoutes(routeFeatureCollections);
+      drawWayPoints();
+    }
+  };
 
   private void drawWayPoints() {
     DirectionsRoute primaryRoute = directionsRoutes.get(primaryRouteIndex);
