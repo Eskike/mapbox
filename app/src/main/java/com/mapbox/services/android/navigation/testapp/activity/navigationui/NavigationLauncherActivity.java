@@ -13,7 +13,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
-import android.widget.FrameLayout;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
@@ -41,14 +41,21 @@ import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
 import com.mapbox.services.android.navigation.testapp.NavigationSettingsActivity;
 import com.mapbox.services.android.navigation.testapp.R;
+import com.mapbox.services.android.navigation.testapp.activity.VersionSpinner;
 import com.mapbox.services.android.navigation.ui.v5.NavigationLauncher;
 import com.mapbox.services.android.navigation.ui.v5.NavigationLauncherOptions;
 import com.mapbox.services.android.navigation.ui.v5.route.NavigationMapRoute;
 import com.mapbox.services.android.navigation.ui.v5.route.OnRouteSelectionChangeListener;
+import com.mapbox.services.android.navigation.v5.navigation.MapboxOfflineRouter;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
+import com.mapbox.services.android.navigation.v5.navigation.OfflineError;
+import com.mapbox.services.android.navigation.v5.navigation.OfflineRoute;
+import com.mapbox.services.android.navigation.v5.navigation.OnOfflineRouteFoundCallback;
+import com.mapbox.services.android.navigation.v5.navigation.OnOfflineTilesConfiguredCallback;
 import com.mapbox.services.android.navigation.v5.utils.LocaleUtils;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
@@ -77,6 +84,7 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
   private DirectionsRoute route;
   private LocaleUtils localeUtils;
   private boolean locationFound;
+  private MapboxOfflineRouter offlineRouter;
 
   @BindView(R.id.mapView)
   MapView mapView;
@@ -85,7 +93,9 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
   @BindView(R.id.loading)
   ProgressBar loading;
   @BindView(R.id.launch_btn_frame)
-  FrameLayout launchBtnFrame;
+  LinearLayout launchBtnFrame;
+  @BindView(R.id.offline_version_spinner)
+  VersionSpinner versionSpinner;
 
   @Override
   protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -137,7 +147,7 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
     mapView.onStart();
   }
 
-  @SuppressWarnings( {"MissingPermission"})
+  @SuppressWarnings({"MissingPermission"})
   @Override
   public void onResume() {
     super.onResume();
@@ -206,7 +216,10 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
     destination = Point.fromLngLat(point.getLongitude(), point.getLatitude());
     launchRouteBtn.setEnabled(false);
     loading.setVisibility(View.VISIBLE);
-    setCurrentMarkerPosition(point);
+    if (!versionSpinner.isOfflineSelected()) {
+      setCurrentMarkerPosition(point);
+    }
+
     if (currentLocation != null) {
       fetchRoute();
     }
@@ -265,24 +278,77 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
       .destination(destination)
       .alternatives(true);
     setFieldsFromSharedPreferences(builder);
-    builder.build()
-      .getRoute(new SimplifiedCallback() {
-        @Override
-        public void onResponse(Call<DirectionsResponse> call, Response<DirectionsResponse> response) {
-          if (validRouteResponse(response)) {
-            hideLoading();
-            route = response.body().routes().get(0);
-            if (route.distance() > 25d) {
-              launchRouteBtn.setEnabled(true);
-              mapRoute.addRoutes(response.body().routes());
-              boundCameraToRoute();
-            } else {
-              Snackbar.make(mapView, R.string.error_select_longer_route, Snackbar.LENGTH_SHORT).show();
-            }
-          }
-        }
-      });
+
+
+    String version = (String) versionSpinner.getSelectedItem();
+
+    if (version.equals(getString(R.string.offline_disabled))) {
+      fetchOnlineRoute(builder);
+    } else {
+      fetchOfflineRoute(builder, version);
+    }
+
+
+
     loading.setVisibility(View.VISIBLE);
+  }
+
+  private void fetchOfflineRoute(NavigationRoute.Builder builder, String version) {
+
+    if (offlineRouter == null) {
+
+      offlineRouter = new MapboxOfflineRouter(new OfflinePath().getDefaultPath().getAbsolutePath());
+    }
+
+    offlineRouter.configure(version, new OnOfflineTilesConfiguredCallback() {
+      @Override
+      public void onConfigured(int numberOfTiles) {
+        offlineRouter.findRoute(OfflineRoute.builder(builder).build(), new OnOfflineRouteFoundCallback() {
+          @Override
+          public void onRouteFound(@NonNull DirectionsRoute route) {
+            onRoutesFound(Collections.singletonList(route));
+            Snackbar.make(mapView, "Offline route fetched", Snackbar.LENGTH_SHORT).show();
+
+          }
+
+          @Override
+          public void onError(@NonNull OfflineError error) {
+            Snackbar.make(mapView, "Offline problem fetching offline", Snackbar.LENGTH_SHORT)
+              .show();
+          }
+        });
+      }
+
+      @Override
+      public void onConfigurationError(@NonNull OfflineError error) {
+        Snackbar.make(mapView, error.getMessage(), Snackbar.LENGTH_SHORT)
+          .show();
+      }
+    });
+  }
+
+  private void fetchOnlineRoute(NavigationRoute.Builder builder) {
+    builder.build().getRoute(new SimplifiedCallback() {
+      @Override
+      public void onResponse(Call<DirectionsResponse> call, Response<DirectionsResponse> response) {
+        if (validRouteResponse(response)) {
+          onRoutesFound(response.body().routes());
+        }
+      }
+    });
+  }
+
+  private void onRoutesFound(@NonNull List<DirectionsRoute> directionsRoutes) {
+    hideLoading();
+    route = directionsRoutes.get(0);
+
+    if (route.distance() > 25d) {
+      launchRouteBtn.setEnabled(true);
+      mapRoute.addRoutes(directionsRoutes);
+      boundCameraToRoute();
+    } else {
+      Snackbar.make(mapView, R.string.error_select_longer_route, Snackbar.LENGTH_SHORT).show();
+    }
   }
 
   private void setFieldsFromSharedPreferences(NavigationRoute.Builder builder) {
@@ -334,6 +400,12 @@ public class NavigationLauncherActivity extends AppCompatActivity implements OnM
     NavigationLauncherOptions.Builder optionsBuilder = NavigationLauncherOptions.builder()
       .shouldSimulateRoute(getShouldSimulateRouteFromSharedPreferences())
       .directionsProfile(getRouteProfileFromSharedPreferences());
+
+    if (versionSpinner.isOfflineSelected()) {
+      optionsBuilder.offlineVersion((String) versionSpinner.getSelectedItem())
+        .offlinePath(new OfflinePath().getDefaultPath().getAbsolutePath());
+    }
+
     CameraPosition initialPosition = new CameraPosition.Builder()
       .target(new LatLng(currentLocation.latitude(), currentLocation.longitude()))
       .zoom(INITIAL_ZOOM)

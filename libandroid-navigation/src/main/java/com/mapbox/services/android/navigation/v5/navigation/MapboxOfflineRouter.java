@@ -46,7 +46,8 @@ public class MapboxOfflineRouter {
   }
 
   /**
-   * Configures the navigator for getting offline routes.
+   * Configures the navigator for getting offline routes. Only accessable by commercial and
+   * enterprise accounts.
    *
    * @param version  version of offline tiles to use
    * @param callback a callback that will be fired when the offline data is configured and

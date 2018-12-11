@@ -154,6 +154,8 @@ public final class NavigationConstants {
   public static final String NAVIGATION_VIEW_ROUTE_KEY = "route_json";
   public static final String NAVIGATION_VIEW_SIMULATE_ROUTE = "navigation_view_simulate_route";
   public static final String NAVIGATION_VIEW_ROUTE_PROFILE_KEY = "navigation_view_route_profile";
+  public static final String NAVIGATION_VIEW_OFFLINE_VERSION_KEY = "navigation_view_offline_key";
+  public static final String NAVIGATION_VIEW_OFFLINE_PATH_KEY = "navigation_view_offline_path_key";
 
   // Step Maneuver Types
   public static final String STEP_MANEUVER_TYPE_TURN = "turn";

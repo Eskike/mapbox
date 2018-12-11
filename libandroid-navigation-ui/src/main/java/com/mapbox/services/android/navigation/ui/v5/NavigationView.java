@@ -36,8 +36,12 @@ import com.mapbox.services.android.navigation.ui.v5.summary.SummaryBottomSheet;
 import com.mapbox.services.android.navigation.v5.location.replay.ReplayRouteLocationEngine;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigationOptions;
+import com.mapbox.services.android.navigation.v5.navigation.MapboxOfflineRouter;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationTimeFormat;
+import com.mapbox.services.android.navigation.v5.navigation.OfflineRoute;
+import com.mapbox.services.android.navigation.v5.navigation.OnOfflineRouteFoundCallback;
+import com.mapbox.services.android.navigation.v5.navigation.OnTileVersionsFoundCallback;
 import com.mapbox.services.android.navigation.v5.utils.DistanceFormatter;
 import com.mapbox.services.android.navigation.v5.utils.LocaleUtils;
 
@@ -483,21 +487,25 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
   }
 
   /**
-   * Initializes the offline data used for fetching offline routes.
+   * Configures the offline router so it's ready to be used for fetching offline routes. Requires
    * <p>
-   * This method must be called before {@link MapboxNavigation#findOfflineRouteFor(Point, Point, Point[])} /
-   * {@link MapboxNavigation#findOfflineRouteFor(Location, Point, Point[])}.
+   * This method must be called onbefore
+   * {@link MapboxOfflineRouter#findRoute(OfflineRoute, OnOfflineRouteFoundCallback)}
    *
-   * @param tileFilePath        path to directory containing tile data
-   * @param translationsDirPath path to directory containing OSRMTI translations
+   * @param offlinePath path to directory containing offline data
+   * @param version version of tiles use for fetching routes
    */
-  public void initializeOfflineData(String tileFilePath, String translationsDirPath) {
-    navigationViewModel.initializeOfflineData(tileFilePath, translationsDirPath);
+  public void configureOfflineRouter(String offlinePath, String version) {
+    navigationViewModel.configureOfflineRouter(offlinePath, version);
+  }
+
+  public void fetchOfflineVersions(OnTileVersionsFoundCallback callback) {
+    navigationViewModel.fetchOfflineVersions(callback);
   }
 
   /**
-   * Sets the NavigationView to use or not use offline data. This call should be followed by a call
-   * to initializeOfflineData.
+   * Sets the NavigationView to use or not use offline data. This call should be preceded by a
+   * successful call to {@link #configureOfflineRouter(String, String)}
    *
    * @param isOffline whether the map should load offline or not
    */
@@ -506,6 +514,10 @@ public class NavigationView extends CoordinatorLayout implements LifecycleObserv
     if (navigationViewModel != null) {
       navigationViewModel.setOffline(isOffline);
     }
+  }
+
+  public boolean isOffline() {
+    return isOffline;
   }
 
   private void initializeView() {

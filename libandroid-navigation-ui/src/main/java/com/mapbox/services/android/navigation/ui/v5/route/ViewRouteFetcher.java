@@ -59,10 +59,10 @@ public class ViewRouteFetcher extends RouteFetcher implements RouteListener {
    *
    * @param event from which the route progress is extracted
    */
-  public void fetchRouteFromOffRouteEvent(OffRouteEvent event) {
+  public void fetchRouteFromOffRouteEvent(OffRouteEvent event, boolean isOffline) {
     if (OffRouteEvent.isValid(event)) {
       RouteProgress routeProgress = event.getRouteProgress();
-      findRouteFromRouteProgress(rawLocation, routeProgress);
+      findRouteFromRouteProgress(rawLocation, routeProgress, isOffline);
     }
   }
 

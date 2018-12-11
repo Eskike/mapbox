@@ -19,11 +19,12 @@
         android:indeterminate="true"
         android:visibility="visible"/>
 
-    <FrameLayout
+    <LinearLayout
         android:id="@+id/launch_btn_frame"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="8dp"
+        android:orientation="vertical"
         android:padding="8dp"
         android:background="@drawable/demo_switch_background"
         android:elevation="2dp"
@@ -37,6 +38,12 @@
             android:enabled="false"
             android:text="Launch Navigation"/>
 
-    </FrameLayout>
+        <com.mapbox.services.android.navigation.testapp.activity.VersionSpinner
+            android:id="@+id/offline_version_spinner"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="offline"/>
+
+    </LinearLayout>
 
 </android.support.design.widget.CoordinatorLayout>

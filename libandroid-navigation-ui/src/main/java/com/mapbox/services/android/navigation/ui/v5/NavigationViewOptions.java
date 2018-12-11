@@ -77,6 +77,10 @@ public abstract class NavigationViewOptions extends NavigationUiOptions {
 
     public abstract Builder waynameChipEnabled(boolean waynameChipEnabled);
 
+    public abstract Builder offlineVersion(String offlineVersion);
+
+    public abstract Builder offlinePath(String offlinePath);
+
     public abstract Builder navigationOptions(MapboxNavigationOptions navigationOptions);
 
     public abstract Builder feedbackListener(FeedbackListener feedbackListener);

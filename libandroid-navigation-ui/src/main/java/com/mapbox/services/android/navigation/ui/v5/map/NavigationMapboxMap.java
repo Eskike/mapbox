@@ -129,11 +129,25 @@ public class NavigationMapboxMap {
    * the attribute <tt>navigationViewDestinationMarker</tt>.
    *
    * @param context  to retrieve the icon drawable from the theme
-   * @param position the point at which the marker will be placed
+   * @param point the point at which the marker will be placed
    */
-  public void addMarker(Context context, Point position) {
-    Marker marker = createMarkerFromIcon(context, position);
+  public void addMarker(Context context, Point point) {
+    Marker marker = createMarkerFromIcon(context, point);
     mapMarkers.add(marker);
+  }
+
+  /**
+   * Adds a marker icon on the map at the given position.
+   * <p>
+   * The icon used for this method can be defined in your theme with
+   * the attribute <tt>navigationViewDestinationMarker</tt>.
+   *
+   * @param context  to retrieve the icon drawable from the theme
+   * @param latLng the point at which the marker will be placed
+   */
+  public void addMarker(Context context, LatLng latLng) {
+    Point point = Point.fromLngLat(latLng.getLongitude(), latLng.getLatitude());
+    addMarker(context, point);
   }
 
   /**

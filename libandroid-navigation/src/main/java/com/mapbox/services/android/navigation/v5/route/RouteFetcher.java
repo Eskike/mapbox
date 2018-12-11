@@ -88,7 +88,8 @@ public class RouteFetcher {
    * @param routeProgress for remaining waypoints along the route
    * @since 0.13.0
    */
-  public void findRouteFromRouteProgress(Location location, RouteProgress routeProgress) {
+  public void findRouteFromRouteProgress(Location location, RouteProgress routeProgress, boolean
+    isOffline) {
     if (isInvalidProgress(location, routeProgress)) {
       return;
     }
@@ -180,9 +181,12 @@ public class RouteFetcher {
     return approaches;
   }
 
-  private void executeRouteCall(NavigationRoute.Builder builder) {
+  private void executeRouteCall(NavigationRoute.Builder builder, boolean isOffline) {
     if (builder != null) {
       builder.accessToken(accessToken);
+      if (isOffline) {
+        offlineRout
+      }
       navigationRoute = builder.build();
       navigationRoute.getRoute(directionsResponseCallback);
     }

@@ -28,6 +28,10 @@ public abstract class NavigationLauncherOptions extends NavigationUiOptions {
 
     public abstract Builder waynameChipEnabled(boolean waynameChipEnabled);
 
+    public abstract Builder offlineVersion(String offlineVersion);
+
+    public abstract Builder offlinePath(String offlinePath);
+
     public abstract Builder initialMapCameraPosition(@Nullable CameraPosition initialMapCameraPosition);
 
     public abstract NavigationLauncherOptions build();
@@ -36,6 +40,7 @@ public abstract class NavigationLauncherOptions extends NavigationUiOptions {
   public static NavigationLauncherOptions.Builder builder() {
     return new AutoValue_NavigationLauncherOptions.Builder()
       .shouldSimulateRoute(false)
-      .waynameChipEnabled(true);
+      .waynameChipEnabled(true)
+      .offlineVersion("Offline Disabled");
   }
 }

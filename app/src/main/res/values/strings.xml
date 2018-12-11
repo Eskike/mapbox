@@ -48,6 +48,7 @@
 
     <string name="unit_type_key" translatable="false">unit_type</string>
     <string name="simulate_route_key" translatable="false">simulate_route</string>
+    <string name="offline_key" translatable="false">offline</string>
     <string name="language_key" translatable="false">language</string>
     <string name="route_profile_key" translatable="false">route_profile</string>
     <string name="view_examples_key" translatable="false">view_examples</string>
