@@ -21,7 +21,7 @@ import com.mapbox.services.android.navigation.v5.eh.storage.Resource;
 import com.mapbox.services.android.navigation.v5.eh.storage.Response;
 import com.mapbox.services.android.navigation.v5.eh.utils.Debouncer;
 import com.mapbox.services.android.navigation.v5.eh.vt.VectorTileParser;
-import com.mapbox.services.android.navigation.v5.vectortile.VectorTile;
+import com.mapbox.services.android.navigation.v5.eh.vectortile.VectorTile;
 
 import java.io.IOException;
 import java.util.ArrayList;

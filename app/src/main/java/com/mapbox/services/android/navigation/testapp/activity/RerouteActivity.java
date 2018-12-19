@@ -31,6 +31,8 @@ import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
 import com.mapbox.mapboxsdk.maps.Style;
 import com.mapbox.services.android.navigation.testapp.R;
 import com.mapbox.services.android.navigation.ui.v5.instruction.InstructionView;
+import com.mapbox.services.android.navigation.v5.eh.EHorizonListener;
+import com.mapbox.services.android.navigation.v5.eh.MapboxEHorizon;
 import com.mapbox.services.android.navigation.v5.location.replay.ReplayRouteLocationEngine;
 import com.mapbox.services.android.navigation.v5.milestone.Milestone;
 import com.mapbox.services.android.navigation.v5.milestone.MilestoneEventListener;
@@ -55,8 +57,8 @@ import retrofit2.Response;
 import timber.log.Timber;
 
 public class RerouteActivity extends HistoryActivity implements OnMapReadyCallback,
-  Callback<DirectionsResponse>, MapboxMap.OnMapClickListener, NavigationEventListener,
-  OffRouteListener, ProgressChangeListener, MilestoneEventListener {
+  Callback<DirectionsResponse>, MapboxMap.OnMapClickListener, NavigationEventListener, OffRouteListener,
+  ProgressChangeListener, MilestoneEventListener, EHorizonListener {
 
   @BindView(R.id.mapView)
   MapView mapView;
@@ -73,6 +75,7 @@ public class RerouteActivity extends HistoryActivity implements OnMapReadyCallba
   private Location lastLocation;
   private ReplayRouteLocationEngine mockLocationEngine;
   private MapboxNavigation navigation;
+  private MapboxEHorizon horizon;
   private MapboxMap mapboxMap;
   private boolean running;
   private boolean tracking;
@@ -98,6 +101,10 @@ public class RerouteActivity extends HistoryActivity implements OnMapReadyCallba
     instructionView.retrieveSoundButton().addOnClickListener(
       v -> Toast.makeText(RerouteActivity.this, "Sound button clicked!", Toast.LENGTH_SHORT).show()
     );
+
+    horizon = new MapboxEHorizon(Mapbox.getAccessToken(), null);
+    horizon.start();
+    horizon.registerListener(this);
   }
 
   @Override
@@ -142,6 +149,7 @@ public class RerouteActivity extends HistoryActivity implements OnMapReadyCallba
     mapView.onDestroy();
     shutdownLocationEngine();
     shutdownNavigation();
+    horizon.unregisterListener(this);
   }
 
   @SuppressLint("MissingPermission")
@@ -174,6 +182,13 @@ public class RerouteActivity extends HistoryActivity implements OnMapReadyCallba
 
     tracking = false;
     return false;
+  }
+
+  @Override
+  public void onUpdate(EHorizonUpdate update) {
+    if (update instanceof MatchedUpdate) {
+      Timber.d("EHorizonUpdate max speed %s", ((MatchedUpdate) update).horizon().current().getOsmMaxSpeed());
+    }
   }
 
   @Override
@@ -250,6 +265,8 @@ public class RerouteActivity extends HistoryActivity implements OnMapReadyCallba
     if (!tracking) {
       mapboxMap.getLocationComponent().forceLocationUpdate(location);
     }
+    Point position = Point.fromLngLat(location.getLongitude(), location.getLatitude());
+    horizon.updatePosition(position);
   }
 
   private void getRoute(Point origin, Point destination) {

@@ -17,10 +17,10 @@ import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static com.mapbox.services.android.navigation.v5.vectortile.VectorTile.Tile;
-import static com.mapbox.services.android.navigation.v5.vectortile.VectorTile.Tile.Feature;
-import static com.mapbox.services.android.navigation.v5.vectortile.VectorTile.Tile.Layer;
-import static com.mapbox.services.android.navigation.v5.vectortile.VectorTile.Tile.Value;
+import static com.mapbox.services.android.navigation.v5.eh.vectortile.VectorTile.Tile;
+import static com.mapbox.services.android.navigation.v5.eh.vectortile.VectorTile.Tile.Feature;
+import static com.mapbox.services.android.navigation.v5.eh.vectortile.VectorTile.Tile.Layer;
+import static com.mapbox.services.android.navigation.v5.eh.vectortile.VectorTile.Tile.Value;
 
 /**
  * Parses RoadBook data encoded in the Mapbox Vector Tile
