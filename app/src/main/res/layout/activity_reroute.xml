@@ -13,8 +13,8 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:mapbox_cameraTargetLat="41.9005"
-        app:mapbox_cameraTargetLng="-87.7789"
+        app:mapbox_cameraTargetLat="48.139201"
+        app:mapbox_cameraTargetLng="11.566202"
         app:mapbox_cameraZoom="10"
         app:mapbox_uiAttribution="false"/>
 

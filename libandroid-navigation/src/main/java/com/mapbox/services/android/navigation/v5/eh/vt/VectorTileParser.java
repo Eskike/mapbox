@@ -27,7 +27,7 @@ import static com.mapbox.services.android.navigation.v5.eh.vectortile.VectorTile
  * format into data structures that can be used in the Graph.
  */
 public final class VectorTileParser {
-    private static final Logger LOGGER = new Logger(VectorTileParser.class);
+    private static final Logger LOGGER = new Logger();
     private final Set<Edge> edges = new HashSet<>();
     private final Set<DrivablePath> drivablePaths = new HashSet<>();
     private CanonicalTileID tileID;

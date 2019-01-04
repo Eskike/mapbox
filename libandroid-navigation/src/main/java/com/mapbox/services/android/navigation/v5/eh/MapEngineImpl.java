@@ -41,7 +41,7 @@ import java.util.concurrent.Executors;
  * Main interface for the MapEngine.
  */
 public class MapEngineImpl implements MapEngine, MapEngineDebug {
-    private static final Logger LOGGER = new Logger(MapEngineImpl.class);
+    private static final Logger LOGGER = new Logger();
     private static final int DEFAULT_STATE_UPDATE_INTERVAL = 200;
 
     // Endpoint configuration
@@ -271,7 +271,10 @@ public class MapEngineImpl implements MapEngine, MapEngineDebug {
         StartupLatch latch = new StartupLatch();
         Thread thread = new Thread(() -> {
             Thread.currentThread().setName("Main Loop");
-            looper = Looper.prepareMainLooper();
+            looper = Looper.get();
+            if (looper == null) {
+                looper = Looper.prepare();
+            }
             looper.post(latch::started);
             looper.run();
         });

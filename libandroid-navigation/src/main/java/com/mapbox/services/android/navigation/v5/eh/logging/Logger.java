@@ -1,30 +1,13 @@
 package com.mapbox.services.android.navigation.v5.eh.logging;
 
-import org.slf4j.LoggerFactory;
+import com.mapbox.services.android.navigation.BuildConfig;
+
+import timber.log.Timber;
 
 /**
  * Simple logging abstraction for now.
  */
 public class Logger {
-    private final org.slf4j.Logger delegate;
-
-    /**
-     * Create a Logger for the given context.
-     *
-     * @param context the name of the context
-     */
-    public Logger(final String context) {
-        delegate = LoggerFactory.getLogger(context);
-    }
-
-    /**
-     * Create a Logger for the given context.
-     *
-     * @param context the class of the context
-     */
-    public Logger(final Class context) {
-        delegate = LoggerFactory.getLogger(context);
-    }
 
     /**
      * Log this on info level.
@@ -33,7 +16,7 @@ public class Logger {
      * @param params the params if any
      */
     public void info(final String format, final Object... params) {
-        delegate.info(String.format(format, params));
+        Timber.i(String.format(format, params));
     }
 
     /**
@@ -43,7 +26,7 @@ public class Logger {
      * @param params the params if any
      */
     public void warn(final String format, final Object... params) {
-        delegate.warn(String.format(format, params));
+        Timber.w(String.format(format, params));
     }
 
     /**
@@ -53,7 +36,7 @@ public class Logger {
      * @param params the params if any
      */
     public void error(final String format, final Object... params) {
-        delegate.error(String.format(format, params));
+        Timber.e(String.format(format, params));
     }
 
     /**
@@ -64,7 +47,7 @@ public class Logger {
      * @param params the params if any
      */
     public void error(final Exception error, final String format, final Object... params) {
-        delegate.error(String.format(format, params), error);
+        Timber.e(String.format(format, params), error);
     }
 
     /**
@@ -74,7 +57,7 @@ public class Logger {
      * @param params the params if any
      */
     public void debug(final String format, final Object... params) {
-        delegate.debug(String.format(format, params));
+        Timber.d(String.format(format, params));
     }
 
     /**
@@ -84,21 +67,21 @@ public class Logger {
      * @param params the params if any
      */
     public void trace(final String format, final Object... params) {
-        delegate.trace(String.format(format, params));
+        Timber.v(String.format(format, params));
     }
 
     /**
      * @return true if trace level is enabled for this logger
      */
     public boolean isTraceEnabled() {
-        return delegate.isTraceEnabled();
+        return BuildConfig.DEBUG;
     }
 
     /**
      * @return true if debug level is enabled for this logger
      */
     public boolean isDebugEnabled() {
-        return delegate.isDebugEnabled();
+        return BuildConfig.DEBUG;
     }
 
 }

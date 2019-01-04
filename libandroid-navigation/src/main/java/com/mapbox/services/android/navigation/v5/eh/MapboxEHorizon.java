@@ -11,10 +11,20 @@ public class MapboxEHorizon {
   private final String accessToken;
   private final MapEngine engine;
 
-  public MapboxEHorizon(@NonNull String accessToken, @Nullable Configuration configuration) {
+  public MapboxEHorizon(@NonNull String accessToken) {
     this.accessToken = accessToken;
     engine = buildMapEngine();
-    Configuration config = buildConfiguration(configuration);
+  }
+
+  public void start() {
+    engine.start();
+  }
+
+  public void updateConfiguration(@Nullable Configuration configuration) {
+    Configuration config = configuration;
+    if (config == null) {
+      config = buildDefaultConfiguration();
+    }
     engine.updateConfiguration(config);
   }
 
@@ -24,10 +34,6 @@ public class MapboxEHorizon {
 
   public void unregisterListener(EHorizonListener listener) {
     engine.unregisterEHorizonListener(listener);
-  }
-
-  public void start() {
-    engine.start();
   }
 
   public void updatePosition(Point position) {
@@ -45,19 +51,10 @@ public class MapboxEHorizon {
   }
 
   @NonNull
-  private Configuration buildConfiguration(@Nullable Configuration configuration) {
-    Configuration config = configuration;
-    if (config == null) {
-      config = buildDefaultConfiguration();
-    }
-    return config;
-  }
-
-  @NonNull
   private Configuration buildDefaultConfiguration() {
     return new Configuration()
       .withHorizonDistance(1000)
-      .withUpdateFrequency(200)
+      .withUpdateFrequency(2000)
       .withHorizonExpansion(HorizonExpansion.LIMITED);
   }
 }

@@ -67,8 +67,9 @@ public class RerouteActivity extends HistoryActivity implements OnMapReadyCallba
   @BindView(R.id.instructionView)
   InstructionView instructionView;
 
-  private Point origin = Point.fromLngLat(-0.358764, 39.494876);
-  private Point destination = Point.fromLngLat(-0.383524, 39.497825);
+  // For now, only Munich is supported
+  private Point origin = Point.fromLngLat(11.471798333333334, 48.15489833333333);
+  private Point destination = Point.fromLngLat(11.475549541458122, 48.16797719803989);
   private Polyline polyline;
 
   private final RerouteActivityLocationCallback callback = new RerouteActivityLocationCallback(this);
@@ -102,8 +103,9 @@ public class RerouteActivity extends HistoryActivity implements OnMapReadyCallba
       v -> Toast.makeText(RerouteActivity.this, "Sound button clicked!", Toast.LENGTH_SHORT).show()
     );
 
-    horizon = new MapboxEHorizon(Mapbox.getAccessToken(), null);
+    horizon = new MapboxEHorizon(Mapbox.getAccessToken());
     horizon.start();
+    horizon.updateConfiguration(null);
     horizon.registerListener(this);
   }
 
@@ -187,7 +189,9 @@ public class RerouteActivity extends HistoryActivity implements OnMapReadyCallba
   @Override
   public void onUpdate(EHorizonUpdate update) {
     if (update instanceof MatchedUpdate) {
-      Timber.d("EHorizonUpdate max speed %s", ((MatchedUpdate) update).horizon().current().getOsmMaxSpeed());
+      int maxSpeed = ((MatchedUpdate) update).horizon().current().getOsmMaxSpeed();
+      Timber.d("EHorizonUpdate max speed %s", maxSpeed);
+      Snackbar.make(contentLayout, "Current max speed " + maxSpeed + " km/h", Snackbar.LENGTH_SHORT).show();
     }
   }
 

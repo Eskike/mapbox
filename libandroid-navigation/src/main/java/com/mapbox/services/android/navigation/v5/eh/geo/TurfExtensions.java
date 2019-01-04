@@ -13,7 +13,7 @@ import java.util.stream.IntStream;
  * Some missing turf functions.
  */
 public final class TurfExtensions {
-    private static final Logger LOGGER = new Logger(TurfExtensions.class);
+    private static final Logger LOGGER = new Logger();
 
     private TurfExtensions() {
     }

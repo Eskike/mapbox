@@ -26,7 +26,7 @@ import static com.mapbox.services.android.navigation.v5.eh.geo.TurfExtensions.po
  * the visible road network within a range.
  */
 public class Graph {
-    private static final Logger LOGGER = new Logger(Graph.class);
+    private static final Logger LOGGER = new Logger();
     private MutableNetwork<Long, Edge> graph;
     private Map<Long, Edge> edgeMap = new HashMap<>();
 

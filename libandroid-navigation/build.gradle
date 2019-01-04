@@ -72,11 +72,6 @@ dependencies {
 
   // EH dependencies
   implementation 'com.google.guava:guava:27.0.1-android'
-  implementation group: 'org.apache.httpcomponents', name: 'httpcore-nio', version: '4.4.10'
-  implementation group: 'org.apache.httpcomponents', name: 'httpasyncclient', version: '4.1.4'
-  implementation group: 'org.slf4j', name: 'slf4j-api', version: '1.7.25'
-  implementation group: 'org.slf4j', name: 'slf4j-log4j12', version: '1.7.25'
-  implementation group: 'log4j', name: 'log4j', version: '1.2.17'
   implementation 'com.google.protobuf:protobuf-java:3.6.1'
 
   // Unit testing

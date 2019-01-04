@@ -13,7 +13,7 @@ import java.util.concurrent.atomic.AtomicReference;
  * be used application wide.
  */
 public class Looper {
-    private static final Logger LOGGER = new Logger(Looper.class);
+    private static final Logger LOGGER = new Logger();
     private static final int MAX_BACKLOG = 5;
 
     private static ThreadLocal<Looper> current = new ThreadLocal<>();

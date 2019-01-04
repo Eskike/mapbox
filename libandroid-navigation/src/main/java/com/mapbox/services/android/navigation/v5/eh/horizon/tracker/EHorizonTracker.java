@@ -34,7 +34,7 @@ import static com.mapbox.services.android.navigation.v5.eh.geo.Bearing.diff;
  * when determining the new matched location, mpp and horizon.
  */
 public class EHorizonTracker {
-    private static final Logger LOGGER = new Logger(EHorizonTracker.class);
+    private static final Logger LOGGER = new Logger();
 
     private static final int MATCH_LIMIT = 3;
 
