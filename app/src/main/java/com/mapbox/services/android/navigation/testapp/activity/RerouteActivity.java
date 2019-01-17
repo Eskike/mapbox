@@ -214,6 +214,9 @@ public class RerouteActivity extends HistoryActivity implements OnMapReadyCallba
 
   @Override
   public void onProgressChange(Location location, RouteProgress routeProgress) {
+    Point position = Point.fromLngLat(location.getLongitude(), location.getLatitude());
+    horizon.updatePosition(position);
+
     boolean isInTunnel = routeProgress.inTunnel();
     lastLocation = location;
     if (!wasInTunnel && isInTunnel) {
@@ -269,8 +272,6 @@ public class RerouteActivity extends HistoryActivity implements OnMapReadyCallba
     if (!tracking) {
       mapboxMap.getLocationComponent().forceLocationUpdate(location);
     }
-    Point position = Point.fromLngLat(location.getLongitude(), location.getLatitude());
-    horizon.updatePosition(position);
   }
 
   private void getRoute(Point origin, Point destination) {
