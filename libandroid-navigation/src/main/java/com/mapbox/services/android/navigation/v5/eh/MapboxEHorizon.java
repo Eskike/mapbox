@@ -45,7 +45,7 @@ public class MapboxEHorizon {
   private MapEngineImpl buildMapEngine() {
     return new MapEngineImpl(
       ZOOM,
-      "https://api.mapbox.com/v4/ivovandongen.d58ubas3/%s/%s/%s.mvt?access_token=%s",
+      "https://api.mapbox.com/v4/ivovandongen.1ehvrexq/%s/%s/%s.mvt?access_token=%s",
       accessToken
     );
   }

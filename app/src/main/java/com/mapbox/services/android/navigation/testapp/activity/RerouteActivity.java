@@ -189,9 +189,16 @@ public class RerouteActivity extends HistoryActivity implements OnMapReadyCallba
   @Override
   public void onUpdate(EHorizonUpdate update) {
     if (update instanceof MatchedUpdate) {
-      int maxSpeed = ((MatchedUpdate) update).horizon().current().getOsmMaxSpeed();
-      Timber.d("EHorizonUpdate max speed %s", maxSpeed);
-      Snackbar.make(contentLayout, "Current max speed " + maxSpeed + " km/h", Snackbar.LENGTH_SHORT).show();
+      Integer maxSpeed = ((MatchedUpdate) update).horizon().current().getOsmMaxSpeed();
+      String msg;
+      if (maxSpeed == null) {
+        msg = "Max speed currently unknown";
+      } else if (maxSpeed == -1) {
+        msg = "No current max speed";
+      } else {
+        msg = String.format("Current max speed %s km/h", maxSpeed);
+      }
+      Snackbar.make(contentLayout, msg, Snackbar.LENGTH_SHORT).show();
     }
   }
 

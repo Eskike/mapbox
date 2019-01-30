@@ -17,7 +17,7 @@ public class DrivablePath {
     private final String name;
     private final WayType type;
     private final long osmWayId;
-    private final int osmMaxSpeed;
+    private final Integer osmMaxSpeed;
 
     /**
      * Create a new DrivablePath.
@@ -32,7 +32,7 @@ public class DrivablePath {
      */
     public DrivablePath(final long id, final List<Point> points,
                         final long osmWayId, final WayType type, final String name,
-                        final int osmMaxSpeed, final Set<Long> edgeIds) {
+                        final Integer osmMaxSpeed, final Set<Long> edgeIds) {
         this.id = id;
         this.points = points;
         this.osmWayId = osmWayId;
@@ -64,9 +64,9 @@ public class DrivablePath {
     }
 
     /**
-     * @return the osm max speed
+     * @return the osm max speed, -1 if none, null if unknown
      */
-    public int getOsmMaxSpeed() {
+    public Integer getOsmMaxSpeed() {
         return osmMaxSpeed;
     }
 

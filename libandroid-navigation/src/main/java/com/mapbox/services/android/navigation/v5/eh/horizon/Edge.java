@@ -31,7 +31,7 @@ public class Edge {
     private final long osmWayId;
 
     // Copied from DrivablePath
-    private int osmMaxSpeed;
+    private Integer osmMaxSpeed;
     private WayType osmWayType;
     private LineString centerLine;
 
@@ -216,7 +216,7 @@ public class Edge {
             osmWayType = drivablePath.getType();
         } else {
             centerLine = null;
-            osmMaxSpeed = -1;
+            osmMaxSpeed = null;
             osmWayType = null;
         }
     }
@@ -250,9 +250,9 @@ public class Edge {
     }
 
     /**
-     * @return the osm max speed
+     * @return the osm max speed, -1 if none, null if unknown
      */
-    public int getOsmMaxSpeed() {
+    public Integer getOsmMaxSpeed() {
         return osmMaxSpeed;
     }
 
@@ -304,7 +304,7 @@ public class Edge {
         private long counterpartId;
         private boolean inverse;
         private long osmWayId;
-        private int osmMaxSpeed;
+        private Integer osmMaxSpeed;
         private LineString centerLine;
         private BoundingBox bounds;
         private WayType osmWayType;
@@ -437,7 +437,7 @@ public class Edge {
          * @param osmMaxSpeed the {@code osmMaxSpeed} to set
          * @return a reference to this Builder
          */
-        public Builder withOsmMaxSpeed(final int osmMaxSpeed) {
+        public Builder withOsmMaxSpeed(final Integer osmMaxSpeed) {
             this.osmMaxSpeed = osmMaxSpeed;
             return this;
         }

@@ -170,7 +170,15 @@ public final class VectorTileParser {
                     //TODO:
                     break;
                 case "maxspeed":
-                    osmMaxSpeed = Math.toIntExact(value.getIntValue());
+                    if (value.hasIntValue()) {
+                        osmMaxSpeed = Math.toIntExact(value.getIntValue());
+                    } else if (value.hasStringValue() && value.getStringValue().equals("none")) {
+                        osmMaxSpeed = -1;
+                    } else if (value.hasStringValue() && value.getStringValue().equals("unknown")) {
+                        osmMaxSpeed = null;
+                    } else {
+                        LOGGER.debug("Unknown value for maxspeed: %s", value);
+                    }
                     break;
                 default:
                     LOGGER.error("Unknown property: %s", key);
