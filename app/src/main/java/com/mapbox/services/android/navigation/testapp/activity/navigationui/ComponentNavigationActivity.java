@@ -6,6 +6,7 @@ import android.content.res.Resources;
 import android.location.Location;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.support.annotation.NonNull;
@@ -15,6 +16,7 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.transition.TransitionManager;
 import android.view.View;
+import android.widget.Toast;
 
 import com.mapbox.android.core.location.LocationEngine;
 import com.mapbox.android.core.location.LocationEngineCallback;
@@ -29,6 +31,7 @@ import com.mapbox.mapboxsdk.camera.CameraPosition;
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory;
 import com.mapbox.mapboxsdk.geometry.LatLng;
 import com.mapbox.mapboxsdk.geometry.LatLngBounds;
+import com.mapbox.mapboxsdk.location.modes.RenderMode;
 import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
@@ -43,17 +46,25 @@ import com.mapbox.services.android.navigation.ui.v5.voice.NavigationSpeechPlayer
 import com.mapbox.services.android.navigation.ui.v5.voice.SpeechAnnouncement;
 import com.mapbox.services.android.navigation.ui.v5.voice.SpeechPlayerProvider;
 import com.mapbox.services.android.navigation.ui.v5.voice.VoiceInstructionLoader;
+import com.mapbox.services.android.navigation.v5.location.replay.ReplayRouteLocationEngine;
 import com.mapbox.services.android.navigation.v5.milestone.Milestone;
 import com.mapbox.services.android.navigation.v5.milestone.MilestoneEventListener;
 import com.mapbox.services.android.navigation.v5.milestone.VoiceInstructionMilestone;
+import com.mapbox.services.android.navigation.v5.navigation.Edge;
 import com.mapbox.services.android.navigation.v5.navigation.MapboxNavigation;
+import com.mapbox.services.android.navigation.v5.navigation.MapboxOfflineRouter;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
+import com.mapbox.services.android.navigation.v5.navigation.OfflineAttributes;
+import com.mapbox.services.android.navigation.v5.navigation.OfflineError;
+import com.mapbox.services.android.navigation.v5.navigation.OnOfflineTilesConfiguredCallback;
 import com.mapbox.services.android.navigation.v5.offroute.OffRouteListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.ProgressChangeListener;
 import com.mapbox.services.android.navigation.v5.routeprogress.RouteProgress;
+import com.mapbox.services.android.navigation.v5.utils.RingBuffer;
 
 import java.io.File;
 import java.lang.ref.WeakReference;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
@@ -109,6 +120,8 @@ public class ComponentNavigationActivity extends HistoryActivity implements OnMa
   private DirectionsRoute route;
   private Point destination;
   private MapState mapState;
+  private MapboxOfflineRouter offlineRouter;
+  private MapboxMap mapboxMap;
 
   private enum MapState {
     INFO,
@@ -124,16 +137,37 @@ public class ComponentNavigationActivity extends HistoryActivity implements OnMa
     ButterKnife.bind(this);
     mapView.onCreate(savedInstanceState);
 
-    // Will call onMapReady
-    mapView.getMapAsync(this);
+    offlineRouter = new MapboxOfflineRouter(obtainOfflineDirectory());
+    offlineRouter.configure("2018_11_18-22_33_58", new OnOfflineTilesConfiguredCallback() {
+      @Override
+      public void onConfigured(int numberOfTiles) {
+        // Will call onMapReady
+        mapView.getMapAsync(ComponentNavigationActivity.this);
+      }
+
+      @Override
+      public void onConfigurationError(@NonNull OfflineError error) {
+        Toast.makeText(ComponentNavigationActivity.this, error.getMessage(), Toast.LENGTH_SHORT).show();
+      }
+    });
+  }
+
+  private String obtainOfflineDirectory() {
+    File offline = Environment.getExternalStoragePublicDirectory("Offline");
+    if (!offline.exists()) {
+      Timber.d("Offline directory does not exist");
+      offline.mkdirs();
+    }
+    return offline.getAbsolutePath();
   }
 
   @Override
   public void onMapReady(@NonNull MapboxMap mapboxMap) {
+    mapboxMap.addOnMapLongClickListener(this);
     mapboxMap.setStyle(new Style.Builder().fromUrl(getString(R.string.navigation_guidance_day)), style -> {
-      mapState = MapState.INFO;
       navigationMap = new NavigationMapboxMap(mapView, mapboxMap);
 
+      mapState = MapState.INFO;
       // For Location updates
       initializeLocationEngine();
 
@@ -180,6 +214,12 @@ public class ComponentNavigationActivity extends HistoryActivity implements OnMa
     TransitionManager.beginDelayedTransition(navigationLayout);
     instructionView.setVisibility(View.VISIBLE);
 
+    locationEngine = new ReplayRouteLocationEngine();
+    ((ReplayRouteLocationEngine) locationEngine).assign(route);
+    navigation.setLocationEngine(locationEngine);
+
+    navigationMap.updateLocationLayerRenderMode(RenderMode.GPS);
+
     // Start navigation
     adjustMapPaddingForNavigation();
     navigation.startNavigation(route);
@@ -211,8 +251,30 @@ public class ComponentNavigationActivity extends HistoryActivity implements OnMa
    * Navigation listeners
    */
 
+  private final RingBuffer<Location> locations = new RingBuffer<>(5);
+  private final List<String> attributes = new ArrayList<>();
+  private Toast toast;
+
   @Override
   public void onProgressChange(Location location, RouteProgress routeProgress) {
+    locations.add(location);
+    if (locations.size() > 2) {
+      List<Location> recent = new ArrayList<>(locations);
+      offlineRouter.findAttributes(new OfflineAttributes(recent, attributes), result -> {
+        List<Edge> edges = result.getEdges();
+        Edge edge = edges.get(edges.size() - 1);
+        String name = "";
+        for (String edgeName : edge.getNames()) {
+          name += edgeName + " ";
+        }
+        if (toast != null) {
+          toast.cancel();
+        }
+        toast = Toast.makeText(ComponentNavigationActivity.this, name, Toast.LENGTH_SHORT);
+        toast.show();
+      });
+    }
+
     // Cache "snapped" Locations for re-route Directions API requests
     updateLocation(location);
 

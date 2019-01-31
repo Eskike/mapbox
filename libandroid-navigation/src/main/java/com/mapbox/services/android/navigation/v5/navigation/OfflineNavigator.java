@@ -31,6 +31,9 @@ class OfflineNavigator {
     new OfflineRouteRetrievalTask(navigator, callback).execute(offlineRoute);
   }
 
+  void retrieveAttributesFor(OfflineAttributes attributes, OnOfflineAttributesFoundCallback callback) {
+    new OfflineAttributesRetrievalTask(navigator, callback).execute(attributes);
+  }
 
   /**
    * Unpacks tar file into a specified destination path.

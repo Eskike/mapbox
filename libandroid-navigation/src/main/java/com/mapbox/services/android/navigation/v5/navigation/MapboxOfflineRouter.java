@@ -67,6 +67,10 @@ public class MapboxOfflineRouter {
     offlineNavigator.retrieveRouteFor(route, callback);
   }
 
+  public void findAttributes(@NonNull OfflineAttributes attributes, OnOfflineAttributesFoundCallback callback) {
+    offlineNavigator.retrieveAttributesFor(attributes, callback);
+  }
+
   /**
    * Starts the download of tiles specified by the provided {@link OfflineTiles} object.
    *
