@@ -34,6 +34,8 @@ public interface SpeechPlayer {
    */
   void setMuted(boolean isMuted);
 
+  void setVolume(float volume);
+
   /**
    * Used in off-route scenarios to stop current
    * announcement (if playing) and voice a rerouting cue.

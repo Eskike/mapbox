@@ -31,7 +31,7 @@ public class NavigationSpeechPlayer implements SpeechPlayer {
    */
   @Override
   public void play(SpeechAnnouncement speechAnnouncement) {
-    speechPlayerProvider.retrieveSpeechPlayer().play(speechAnnouncement);
+    speechPlayerProvider.retrieveMapboxSpeechPlayer().play(speechAnnouncement);
   }
 
   /**
@@ -58,6 +58,11 @@ public class NavigationSpeechPlayer implements SpeechPlayer {
   public void setMuted(boolean isMuted) {
     this.isMuted = isMuted;
     speechPlayerProvider.setMuted(isMuted);
+  }
+
+  @Override
+  public void setVolume(float volume) {
+    speechPlayerProvider.retrieveMapboxSpeechPlayer().setVolume(volume);
   }
 
   /**

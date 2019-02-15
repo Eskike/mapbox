@@ -26,6 +26,7 @@ public class SpeechPlayerProvider {
 
   private static final int FIRST_PLAYER = 0;
 
+  private MapboxSpeechPlayer mapboxSpeechPlayer;
   private AndroidSpeechPlayer androidSpeechPlayer;
   private List<SpeechPlayer> speechPlayers = new ArrayList<>(2);
 
@@ -42,8 +43,15 @@ public class SpeechPlayerProvider {
     initialize(context, language, voiceLanguageSupported, voiceInstructionLoader);
   }
 
-  SpeechPlayer retrieveSpeechPlayer() {
-    return speechPlayers.get(FIRST_PLAYER);
+  SpeechPlayerProvider(MapboxSpeechPlayer mapboxSpeechPlayer, AndroidSpeechPlayer androidSpeechPlayer) {
+    this.mapboxSpeechPlayer = mapboxSpeechPlayer;
+    this.androidSpeechPlayer = androidSpeechPlayer;
+    speechPlayers.add(mapboxSpeechPlayer);
+    speechPlayers.add(androidSpeechPlayer);
+  }
+
+  SpeechPlayer retrieveMapboxSpeechPlayer() {
+    return mapboxSpeechPlayer;
   }
 
   AndroidSpeechPlayer retrieveAndroidSpeechPlayer() {
@@ -88,7 +96,7 @@ public class SpeechPlayerProvider {
       return;
     }
     voiceInstructionLoader.setupMapboxSpeechBuilder(language);
-    MapboxSpeechPlayer mapboxSpeechPlayer = new MapboxSpeechPlayer(context, listener, voiceInstructionLoader);
+    mapboxSpeechPlayer = new MapboxSpeechPlayer(context, listener, voiceInstructionLoader);
     speechPlayers.add(mapboxSpeechPlayer);
   }
 

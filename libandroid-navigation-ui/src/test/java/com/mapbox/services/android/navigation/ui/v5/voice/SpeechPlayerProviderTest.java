@@ -24,7 +24,7 @@ public class SpeechPlayerProviderTest {
     boolean voiceLanguageSupported = true;
     SpeechPlayerProvider provider = buildSpeechPlayerProvider(voiceLanguageSupported);
 
-    SpeechPlayer speechPlayer = provider.retrieveSpeechPlayer();
+    SpeechPlayer speechPlayer = provider.retrieveMapboxSpeechPlayer();
 
     assertTrue(speechPlayer instanceof MapboxSpeechPlayer);
   }
@@ -34,7 +34,7 @@ public class SpeechPlayerProviderTest {
     boolean voiceLanguageNotSupported = false;
     SpeechPlayerProvider provider = buildSpeechPlayerProvider(voiceLanguageNotSupported);
 
-    SpeechPlayer speechPlayer = provider.retrieveSpeechPlayer();
+    SpeechPlayer speechPlayer = provider.retrieveMapboxSpeechPlayer();
 
     assertTrue(speechPlayer instanceof AndroidSpeechPlayer);
   }

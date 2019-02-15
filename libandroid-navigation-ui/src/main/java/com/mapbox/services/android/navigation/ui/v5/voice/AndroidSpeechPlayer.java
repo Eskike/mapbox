@@ -94,6 +94,11 @@ class AndroidSpeechPlayer implements SpeechPlayer {
     }
   }
 
+  @Override
+  public void setVolume(float volume) {
+    // TODO
+  }
+
   /**
    * To be called during an off-route event, mutes TTS
    */

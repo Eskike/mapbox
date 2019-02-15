@@ -55,6 +55,10 @@ class MapboxSpeechPlayer implements SpeechPlayer {
     instructionQueue = new ConcurrentLinkedQueue();
   }
 
+  MapboxSpeechPlayer(MediaPlayer mediaPlayer) {
+    this.mediaPlayer = mediaPlayer;
+  }
+
   /**
    * Plays the specified text instruction using MapboxSpeech API, defaulting to SSML input type
    *
@@ -79,6 +83,11 @@ class MapboxSpeechPlayer implements SpeechPlayer {
   public void setMuted(boolean isMuted) {
     this.isMuted = isMuted;
     muteSpeech();
+  }
+
+  @Override
+  public void setVolume(float volume) {
+    mediaPlayer.setVolume(volume, volume);
   }
 
   @Override
