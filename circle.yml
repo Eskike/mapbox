@@ -130,7 +130,7 @@ jobs:
       - deploy:
           name: Publish Navigation SDK To Maven Central
           command: |
-            if [ "${CIRCLE_BRANCH}" == "dan-history-event" ]; then
+            if [ "${CIRCLE_BRANCH}" == "pg-history-event-refresh" ]; then
             make publish ;
             fi
       - store_artifacts:
