@@ -12,7 +12,7 @@ ext {
       mapboxSdkServices      : '4.5.0',
       mapboxEvents           : '4.2.0',
       mapboxCore             : '1.2.0',
-      mapboxNavigator        : 'kk_predict_dist-SNAPSHOT-1',
+      mapboxNavigator        : 'kk_refresh-SNAPSHOT-2',
       mapboxAnnotationPlugin : '0.5.0',
       mapboxSearchSdk        : '0.1.0-SNAPSHOT',
       autoValue              : '1.5.4',
