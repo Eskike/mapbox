@@ -119,7 +119,7 @@ jobs:
           command: |
             if [ -n "${MOBILE_METRICS_TOKEN}" ]; then
               if [[ "$CIRCLE_BRANCH" == "pg-memory-benchmark" ]]; then
-                curl -X POST --header "Content-Type: application/json" -d '{"build_parameters": {"CIRCLE_JOB": "android-navigation-benchmark", "BENCHMARK_BUILD_SDK_VERSION": "0.28.0"}}' https://circleci.com/api/v1.1/project/github/mapbox/mobile-metrics/tree/pg-nav-mem-benchmark?circle-token=$MOBILE_METRICS_TOKEN
+                curl -X POST --header "Content-Type: application/json" -d '{"build_parameters": {"CIRCLE_JOB": "android-navigation-benchmark", "BENCHMARK_BUILD_SDK_VERSION": "0.29.0"}}' https://circleci.com/api/v1.1/project/github/mapbox/mobile-metrics/tree/pg-nav-mem-benchmark?circle-token=$MOBILE_METRICS_TOKEN
               fi
             fi
       - run:
